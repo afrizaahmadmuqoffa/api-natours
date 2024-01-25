@@ -13,49 +13,6 @@ exports.aliasTopTours = (req, res, next) => {
 
 exports.getTours = async (req, res) => {
     try {
-        // const { fields, page, limit, sort, order, ...filters } = req.query
-
-        // let whereClause = {}
-        // for (const key in filters) {
-        //     const [field, operator] = key.split('_')
-
-        //     switch (operator) {
-        //         case 'lt':
-        //             whereClause[field] = { [Sequelize.Op.lt]: filters[key] }
-        //             break
-        //         case 'gt':
-        //             whereClause[field] = { [Sequelize.Op.gt]: filters[key] }
-        //             break
-        //         case 'gte':
-        //             whereClause[field] = { [Sequelize.Op.gte]: filters[key] }
-        //             break
-        //         case 'lte':
-        //             whereClause[field] = { [Sequelize.Op.lte]: filters[key] }
-        //             break
-        //         default:
-        //             whereClause[field] = filters[key]
-
-        //     }
-        // }
-
-        // let orderClause = [['createdAt', 'ASC']]
-        // if (sort && order) {
-        //     const sortColumns = sort.split('_')
-        //     orderClause = sortColumns.map(col => [col, order])
-        // }
-        // console.log(orderClause)
-        // let attributes;
-        // if (fields) {
-        //     attributes = fields.split(',')
-        // }
-
-        // const offset = (page - 1) * (parseInt(limit) || 10)
-
-        // if (page) {
-        //     const numTours = await Tour.count()
-        //     if (offset >= numTours) throw new Error('This page does not exist')
-        // }
-
         const query = new APIFeatures(req.query)
 
         const where = query.filtering()
