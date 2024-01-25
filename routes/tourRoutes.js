@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const tourControllers = require('../controllers/tourControllers')
 
-// router.param('id', tourControllers.checkId)
-
 router.get('/api/v1/tours', tourControllers.getTours)
 
 router.get('/api/v1/tours/:id', tourControllers.getTourById)
+
+router.get('/api/v1/top-5-cheap-tours', tourControllers.aliasTopTours, tourControllers.getTours)
 
 router.post('/api/v1/tours', tourControllers.createTour)
 
