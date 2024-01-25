@@ -41,6 +41,11 @@ exports.getTours = async (req, res) => {
 
         const offset = (page - 1) * (parseInt(limit) || 10)
 
+        if (page) {
+            const numTours = await Tour.count()
+            if (offset >= numTours) throw new Error('This page does not exist')
+        }
+
         const tours = await Tour.findAll({
             attributes: attributes,
             where: whereClause,
