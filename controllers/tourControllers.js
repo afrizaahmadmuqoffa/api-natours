@@ -4,7 +4,7 @@ const { Op } = require('sequelize')
 
 exports.getTours = async (req, res) => {
     try {
-        const { fields, sort, order, ...filters } = req.query
+        const { fields, page, limit, sort, order, ...filters } = req.query
 
         let whereClause = {}
         for (const key in filters) {
@@ -39,13 +39,17 @@ exports.getTours = async (req, res) => {
             attributes = fields.split(',')
         }
 
+        const offset = (page - 1) * (parseInt(limit) || 10)
+
         const tours = await Tour.findAll({
             attributes: attributes,
             where: whereClause,
-            order: orderClause,
+            limit: parseInt(limit) || 10,
+            offset: offset || 0,
+            order: orderClause
         })
 
-        const total = await Tour.count({ where: whereClause })
+        const total = tours.length
 
         res.status(200).json({
             status: 'success',
