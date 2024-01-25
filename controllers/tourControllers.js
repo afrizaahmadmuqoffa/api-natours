@@ -4,40 +4,46 @@ const { Op } = require('sequelize')
 
 exports.getTours = async (req, res) => {
     try {
-        const { sort, order, ...filters } = req.query;
+        const { fields, sort, order, ...filters } = req.query
 
-        const whereClause = {};
+        let whereClause = {}
         for (const key in filters) {
-            const [field, operator] = key.split('_');
+            const [field, operator] = key.split('_')
 
             switch (operator) {
                 case 'lt':
-                    whereClause[field] = { [Sequelize.Op.lt]: filters[key] };
-                    break;
+                    whereClause[field] = { [Sequelize.Op.lt]: filters[key] }
+                    break
                 case 'gt':
-                    whereClause[field] = { [Sequelize.Op.gt]: filters[key] };
-                    break;
+                    whereClause[field] = { [Sequelize.Op.gt]: filters[key] }
+                    break
                 case 'gte':
-                    whereClause[field] = { [Sequelize.Op.gte]: filters[key] };
-                    break;
+                    whereClause[field] = { [Sequelize.Op.gte]: filters[key] }
+                    break
                 case 'lte':
-                    whereClause[field] = { [Sequelize.Op.lte]: filters[key] };
-                    break;
+                    whereClause[field] = { [Sequelize.Op.lte]: filters[key] }
+                    break
                 default:
-                    whereClause[field] = filters[key];
+                    whereClause[field] = filters[key]
 
             }
         }
 
-        const orderClause = [];
+        let orderClause = []
         if (sort && order) {
-            orderClause.push([sort, order]);
+            orderClause.push([sort, order])
+        }
+
+        let attributes;
+        if (fields) {
+            attributes = fields.split(',')
         }
 
         const tours = await Tour.findAll({
+            attributes: attributes,
             where: whereClause,
             order: orderClause,
-        });
+        })
 
         const total = await Tour.count({ where: whereClause })
 
