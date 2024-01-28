@@ -20,7 +20,7 @@ sequelize.sync({ force: false }).then(() => {
     console.log('Database and tables synced');
 })
     .catch(e => {
-        console.error(e.message)
+        console.error('Error syncing database: ', e)
     })
 
 

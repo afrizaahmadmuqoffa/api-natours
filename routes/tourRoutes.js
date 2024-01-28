@@ -6,7 +6,10 @@ router.get('/api/v1/top-5-cheap-tours', tourControllers.aliasTopTours, tourContr
 
 router.get('/api/v1/tour-stats', tourControllers.getTourStats)
 
+router.get('/api/v1/monthly-plan/:year', tourControllers.getMonthlyPlan)
+
 router.get('/api/v1/tours', tourControllers.getTours)
+
 
 router.get('/api/v1/tours/:id', tourControllers.getTourById)
 

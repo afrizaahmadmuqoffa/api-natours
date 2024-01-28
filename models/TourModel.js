@@ -88,9 +88,24 @@ const Tour = sequelize.define('tour', {
     images: {
         type: DataTypes.JSON
     },
-    startedDate: {
-        type: DataTypes.JSON
-    }
+    startedDate_1: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    startedDate_2: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    startedDate_3: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    startedTime: {
+        type: DataTypes.TIME,
+        allowNull: false
+    },
+}, {
+    timezone: '+07:00',
 })
 
 module.exports = Tour

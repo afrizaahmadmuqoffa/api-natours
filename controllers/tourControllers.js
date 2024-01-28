@@ -168,9 +168,52 @@ exports.getTourStats = async (req, res) => {
         })
 
     } catch (err) {
-        res.status(400).json({
+        res.status(404).json({
             status: 'Fail',
             message: err.message
         })
     }
 }
+
+exports.getMonthlyPlan = async (req, res) => {
+    try {
+        const { year } = req.params
+        const parsedYear = parseInt(year)
+
+        const sqlQuery = `
+        SELECT
+        EXTRACT(MONTH FROM startedDate) AS bulan,
+        COUNT(*) AS jumlah_tur,
+        GROUP_CONCAT(name_dest ORDER BY startedDate) AS nama_tur
+        FROM (
+        SELECT id, name_dest, startedDate_1 AS startedDate FROM tours
+        UNION ALL
+        SELECT id, name_dest, startedDate_2 AS startedDate FROM tours
+        UNION ALL
+        SELECT id, name_dest, startedDate_3 AS startedDate FROM tours
+        ) AS combined_dates
+        WHERE
+        startedDate BETWEEN '${parsedYear}-01-01' AND '${parsedYear}-12-31'
+        GROUP BY
+        bulan
+        ORDER BY
+        bulan;
+        `;
+
+        // Mengeksekusi query dengan async/await
+        const plan = await sequelize.query(sqlQuery, { type: sequelize.QueryTypes.SELECT });
+
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                plan
+            }
+        })
+    } catch (err) {
+        res.status(404).json({
+            status: 'Fail',
+            message: err.message
+        })
+    }
+} 
