@@ -15,7 +15,7 @@ app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-
+//sequelize sync
 sequelize.sync({ force: false }).then(() => {
     console.log('Database and tables synced');
 })

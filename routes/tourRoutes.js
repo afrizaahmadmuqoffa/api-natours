@@ -10,7 +10,6 @@ router.get('/api/v1/monthly-plan/:year', tourControllers.getMonthlyPlan)
 
 router.get('/api/v1/tours', tourControllers.getTours)
 
-
 router.get('/api/v1/tours/:id', tourControllers.getTourById)
 
 router.post('/api/v1/tours', tourControllers.createTour)
