@@ -1,8 +1,9 @@
 const Tour = require('../models/TourModel')
-const { Sequelize } = require('sequelize')
+const { sqlQuery } = require('../utils/query')
 const sequelize = require('../config/db')
 const { Op } = require('sequelize')
 const APIFeatures = require('../utils/APIFeatures')
+const OperationalError = require('../utils/operationalError')
 
 exports.aliasTopTours = (req, res, next) => {
     req.query.limit = '5'
@@ -13,7 +14,7 @@ exports.aliasTopTours = (req, res, next) => {
     next()
 }
 
-exports.getTours = async (req, res) => {
+exports.getTours = async (req, res, next) => {
     try {
         console.log(req.query)
         const query = new APIFeatures(req.query)
@@ -42,16 +43,18 @@ exports.getTours = async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(404).json({
-            status: 'Not Found!',
-            message: err.message
-        })
+        next(err)
     }
 }
 
-exports.getTourById = async (req, res) => {
+exports.getTourById = async (req, res, next) => {
     try {
         const tour = await Tour.findByPk(req.params.id)
+
+        if (!tour) {
+            throw new OperationalError(404, `Id not found!`)
+        }
+
         res.status(200).json({
             status: 'success',
             data: {
@@ -59,16 +62,12 @@ exports.getTourById = async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(404).json({
-            status: 'Not Found!',
-            message: err.message
-        })
-
+        next(err)
     }
 
 }
 
-exports.createTour = async (req, res) => {
+exports.createTour = async (req, res, next) => {
     try {
         const newTour = await Tour.create(req.body)
 
@@ -79,67 +78,55 @@ exports.createTour = async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(400).json({
-            status: 'Fail',
-            message: err.message
-        })
+        next(err)
     }
 }
 
-exports.updateTour = async (req, res) => {
+exports.updateTour = async (req, res, next) => {
     try {
-        const tour = await Tour.findByPk(req.params.id)
-        if (tour) {
-            await tour.update(req.body)
+        const tourId = await Tour.findByPk(req.params.id)
 
-            res.status(200).json({
-                status: 'success',
-                data: {
-                    tour
-                }
-            })
-        } else {
-            return res.status(404).json({
-                message: 'Not Found!'
-            })
+        if (!tourId) {
+            throw new OperationalError(404, `Id not found!`)
         }
-    } catch (err) {
-        res.status(400).json({
-            status: 'Fail',
-            message: err.message
+
+        const tour = await tourId.update(req.body)
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                tour
+            }
         })
+
+    } catch (err) {
+        next(err)
     }
 }
 
-exports.deleteTour = async (req, res) => {
+exports.deleteTour = async (req, res, next) => {
     try {
-        const tour = await Tour.findByPk(req.params.id)
+        const tourId = await Tour.findByPk(req.params.id)
 
-        if (tour) {
-            await tour.destroy()
-
-            res.status(204).json({
-                status: 'success',
-                data: {
-                    tour
-                }
-            })
-        } else {
-            res.status(404).json({
-                status: 'Not Found!',
-                message: err.message
-            })
+        if (!tourId) {
+            throw new OperationalError(404, `Id not found!`)
         }
-    } catch (err) {
-        res.status(400).json({
-            status: 'Fail',
-            message: err.message
+        const tour = await tourId.destroy()
+
+        res.status(204).json({
+            status: 'success',
+            data: {
+                tour
+            }
         })
+
+    } catch (err) {
+        next(err)
     }
 
 }
 
-exports.getTourStats = async (req, res) => {
+exports.getTourStats = async (req, res, next) => {
     try {
         const stats = await Tour.findAll({
             attributes: ['difficulty',
@@ -166,40 +153,16 @@ exports.getTourStats = async (req, res) => {
         })
 
     } catch (err) {
-        res.status(404).json({
-            status: 'Fail',
-            message: err.message
-        })
+        next(err)
     }
 }
 
-exports.getMonthlyPlan = async (req, res) => {
+exports.getMonthlyPlan = async (req, res, next) => {
     try {
         const { year } = req.params
         const parsedYear = parseInt(year)
 
-        const sqlQuery = `
-        SELECT
-        EXTRACT(MONTH FROM startedDate) AS bulan,
-        COUNT(*) AS jumlah_tur,
-        GROUP_CONCAT(name_dest ORDER BY startedDate) AS nama_tur
-        FROM (
-        SELECT id, name_dest, startedDate_1 AS startedDate FROM tours
-        UNION ALL
-        SELECT id, name_dest, startedDate_2 AS startedDate FROM tours
-        UNION ALL
-        SELECT id, name_dest, startedDate_3 AS startedDate FROM tours
-        ) AS combined_dates
-        WHERE
-        startedDate BETWEEN '${parsedYear}-01-01' AND '${parsedYear}-12-31'
-        GROUP BY
-        bulan
-        ORDER BY
-        bulan;
-        `;
-
-        // Mengeksekusi query dengan async/await
-        const plan = await sequelize.query(sqlQuery, { type: sequelize.QueryTypes.SELECT });
+        const plan = await sequelize.query(sqlQuery(parsedYear), { type: sequelize.QueryTypes.SELECT })
 
 
         res.status(200).json({
@@ -209,9 +172,6 @@ exports.getMonthlyPlan = async (req, res) => {
             }
         })
     } catch (err) {
-        res.status(404).json({
-            status: 'Fail',
-            message: err.message
-        })
+        next(err)
     }
 } 
